@@ -1,3 +1,32 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# dbt
+dbt/sport_benefits/target/
+dbt/sport_benefits/logs/
+dbt/sport_benefits/dbt_packages/
+
+# Local data and logs
+data/generated/*
+!data/generated/.gitkeep
+data/output/*
+!data/output/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# IDE / system
+.vscode/
+.idea/
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
