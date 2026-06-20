@@ -12,28 +12,36 @@ with active_parameters as (
     from {{ ref('config_benefit_parameters') }}
 
     where record_is_valid
-      and valid_from <= current_date
-      and (
-          valid_to is null
-          or valid_to >= current_date
-      )
+
+),
+
+calculation_context as (
+
+    select
+        max(activity_date) as calculation_as_of_date
+
+    from {{ ref('fct_sport_activities') }}
 
 ),
 
 employee_activity_counts as (
 
     select
-        employee_id,
+        activities.employee_id,
         count(*) as activity_count_last_12_months,
-        min(activity_date) as first_activity_date,
-        max(activity_date) as last_activity_date
+        min(activities.activity_date) as first_activity_date,
+        max(activities.activity_date) as last_activity_date
 
-    from {{ ref('fct_sport_activities') }}
+    from {{ ref('fct_sport_activities') }} as activities
 
-    where activity_date >= current_date - interval '12 months'
-      and activity_date <= current_date
+    cross join calculation_context
 
-    group by employee_id
+    where activities.activity_date >= (
+        calculation_context.calculation_as_of_date - interval '12 months'
+    )
+      and activities.activity_date <= calculation_context.calculation_as_of_date
+
+    group by activities.employee_id
 
 ),
 
@@ -67,6 +75,7 @@ select
         0
     ) as activity_count_last_12_months,
 
+    calculation_context.calculation_as_of_date,
     active_parameters.wellbeing_activity_threshold,
     active_parameters.wellbeing_days,
 
@@ -95,3 +104,4 @@ left join employee_activity_counts
     on employees.employee_id = employee_activity_counts.employee_id
 
 cross join active_parameters
+cross join calculation_context

@@ -3,7 +3,8 @@ version: 2
 sources:
   - name: raw
     description: >
-      Données brutes injectées dans PostgreSQL par les modules Python.
+      Données brutes injectées dans PostgreSQL par les modules Python
+      ou par des fichiers SQL versionnés.
       Toutes les colonnes issues des sources sont stockées sous forme de texte.
 
     schema: raw
@@ -81,3 +82,34 @@ sources:
           - name: elapsed_seconds
           - name: activity_comment
           - name: source_system
+
+      - name: google_routes_responses_txt
+        description: >
+          Requêtes et réponses brutes de Google Routes utilisées pour
+          contrôler les distances domicile-bureau déclarées.
+
+        columns:
+          - name: source_file
+            description: Origine technique de la réponse injectée.
+          - name: source_row_number
+            description: Numéro de ligne source du salarié traité.
+          - name: request_key
+            description: Empreinte déterministe de la requête Google Routes.
+          - name: employee_id
+            description: Identifiant salarié brut.
+          - name: home_address
+            description: Adresse domicile transmise à Google Routes.
+          - name: office_address
+            description: Adresse du site de travail de référence.
+          - name: declared_commute_mode
+            description: Mode de déplacement déclaré par le salarié.
+          - name: google_travel_mode
+            description: Mode transmis à Google Routes.
+          - name: request_payload_json
+            description: Corps JSON brut de la requête envoyée.
+          - name: response_http_status
+            description: Statut HTTP retourné par Google Routes.
+          - name: response_payload_json
+            description: Corps JSON brut de la réponse reçue.
+          - name: requested_at
+            description: Horodatage UTC de l'appel API.
