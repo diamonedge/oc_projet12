@@ -1,3 +1,4 @@
+#!/bin/sh
 test ! -e .env || { echo ".env existe déjà : arrêt."; exit 1; }
 
 secret() {
