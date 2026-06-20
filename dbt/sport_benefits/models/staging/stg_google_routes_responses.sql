@@ -1,6 +1,4 @@
 with typed as (
-
-```
 select
     {{ clean_text('source_file') }} as source_file,
 
@@ -33,13 +31,9 @@ select
         as requested_at
 
 from {{ source('raw', 'google_routes_responses_txt') }}
-```
-
 ),
 
 parsed as (
-
-```
 select
     *,
 
@@ -58,13 +52,9 @@ select
     ) }} as route_duration_seconds
 
 from typed
-```
-
 ),
 
 validated as (
-
-```
 select
     *,
 
@@ -101,8 +91,6 @@ select
     end as record_is_valid
 
 from parsed
-```
-
 )
 
 select *
