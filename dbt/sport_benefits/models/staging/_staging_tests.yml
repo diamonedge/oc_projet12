@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_hr_employees
+    description: Référentiel RH nettoyé et typé.
+
+    data_tests:
+      - valid_records:
+          config:
+            alias: stg_hr_employees_invalid_records
+            schema: audit
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            tags: ["quality", "staging"]
+
+  - name: stg_employee_sport_profile
+    description: Référentiel des pratiques sportives déclarées.
+
+    data_tests:
+      - valid_records:
+          config:
+            alias: stg_employee_sport_profile_invalid_records
+            schema: audit
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            tags: ["quality", "staging"]
+
+  - name: stg_sport_activities
+    description: Activités sportives nettoyées et typées.
+
+    data_tests:
+      - valid_records:
+          config:
+            alias: stg_sport_activities_invalid_records
+            schema: audit
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            tags: ["quality", "staging"]

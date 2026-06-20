@@ -1,0 +1,83 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Données brutes injectées dans PostgreSQL par les modules Python.
+      Toutes les colonnes issues des sources sont stockées sous forme de texte.
+
+    schema: raw
+
+    tables:
+      - name: benefit_parameters_txt
+        description: >
+          Paramètres métier bruts injectés sous forme textuelle.
+          Ils sont typés dans la couche config par dbt.
+
+        columns:
+          - name: source_file
+          - name: source_row_number
+          - name: parameter_name
+          - name: parameter_value
+          - name: valid_from
+          - name: valid_to
+          - name: parameter_comment
+
+      - name: hr_employees_txt
+        description: >
+          Référentiel RH brut provenant du fichier Excel Données RH.
+
+        columns:
+          - name: source_file
+            description: Nom du fichier source injecté.
+          - name: source_row_number
+            description: Numéro de ligne dans le fichier source.
+          - name: employee_id
+            description: Identifiant salarié brut.
+          - name: last_name
+            description: Nom brut.
+          - name: first_name
+            description: Prénom brut.
+          - name: birth_date
+            description: Date de naissance brute.
+          - name: business_unit
+            description: Unité métier brute.
+          - name: hire_date
+            description: Date d'embauche brute.
+          - name: gross_salary
+            description: Salaire brut annuel sous forme textuelle.
+          - name: contract_type
+            description: Type de contrat brut.
+          - name: paid_leave_days
+            description: Nombre de jours de congés sous forme textuelle.
+          - name: home_address
+            description: Adresse domicile brute.
+          - name: commute_mode
+            description: Mode de déplacement déclaré.
+
+      - name: employee_sport_profile_txt
+        description: >
+          Référentiel brut des pratiques sportives déclarées par salarié.
+
+        columns:
+          - name: source_file
+          - name: source_row_number
+          - name: employee_id
+          - name: declared_sport
+
+      - name: sport_activities_txt
+        description: >
+          Historique brut simulé d'activités sportives, analogue à une source Strava.
+
+        columns:
+          - name: source_file
+          - name: source_row_number
+          - name: activity_id
+          - name: employee_id
+          - name: activity_start_datetime
+          - name: sport_type
+          - name: distance_meters
+          - name: activity_end_datetime
+          - name: elapsed_seconds
+          - name: activity_comment
+          - name: source_system
