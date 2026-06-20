@@ -20,6 +20,8 @@ data/generated/*
 data/output/*
 !data/output/.gitkeep
 logs/*
+data/input/*
+!data/input/.gitkeep
 !logs/.gitkeep
 
 # IDE / system
