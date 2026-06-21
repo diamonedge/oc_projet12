@@ -1,0 +1,171 @@
+version: 2
+
+models:
+  - name: mart_wellbeing_eligibility
+    description: >
+      Éligibilité annuelle des salariés aux jours bien-être.
+
+    columns:
+      - name: employee_id
+        data_tests:
+          - unique:
+              name: mart_wellbeing_employee_id_unique
+              config:
+                severity: warn
+                store_failures: true
+                store_failures_as: table
+                schema: audit
+
+          - not_null:
+              name: mart_wellbeing_employee_id_not_null
+              config:
+                severity: warn
+                store_failures: true
+                store_failures_as: table
+                schema: audit
+
+    data_tests:
+      - is_true:
+          name: mart_wellbeing_eligibility_matches_activity_threshold
+          arguments:
+            expression: >
+              is_wellbeing_eligible =
+              (
+                activity_count_last_12_months >=
+                wellbeing_activity_threshold
+              )
+          config:
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            schema: audit
+
+      - is_true:
+          name: mart_wellbeing_days_match_eligibility
+          arguments:
+            expression: >
+              awarded_wellbeing_days =
+              case
+                when is_wellbeing_eligible then wellbeing_days
+                else 0
+              end
+          config:
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            schema: audit
+
+  - name: mart_commute_bonus_eligibility
+    description: >
+      Éligibilité annuelle des salariés à la prime de déplacement sportif.
+
+    columns:
+      - name: employee_id
+        data_tests:
+          - unique:
+              name: mart_commute_bonus_employee_id_unique
+              config:
+                severity: warn
+                store_failures: true
+                store_failures_as: table
+                schema: audit
+
+          - not_null:
+              name: mart_commute_bonus_employee_id_not_null
+              config:
+                severity: warn
+                store_failures: true
+                store_failures_as: table
+                schema: audit
+
+    data_tests:
+      - is_true:
+          name: mart_commute_bonus_flag_matches_reason
+          arguments:
+            expression: >
+              is_commute_bonus_eligible =
+              (eligibility_reason = 'ELIGIBLE')
+          config:
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            schema: audit
+
+      - is_true:
+          name: mart_commute_bonus_amount_matches_eligibility
+          arguments:
+            expression: >
+              annual_commute_bonus_gross =
+              case
+                when is_commute_bonus_eligible
+                  then round(gross_salary * bonus_rate, 2)
+                else 0
+              end
+          config:
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            schema: audit
+
+      - is_true:
+          name: mart_commute_bonus_eligible_employee_has_valid_route
+          arguments:
+            expression: >
+              not is_commute_bonus_eligible
+              or (
+                is_active_commute_declared
+                and has_valid_route
+                and route_distance_km is not null
+                and maximum_authorized_distance_km is not null
+                and route_distance_km <= maximum_authorized_distance_km
+              )
+          config:
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            schema: audit
+
+  - name: mart_benefits_impact_by_business_unit
+    description: >
+      Impact agrégé des avantages sportifs par unité métier.
+
+    columns:
+      - name: calculation_as_of_date
+        data_tests:
+          - not_null:
+              name: mart_benefits_impact_calculation_date_not_null
+              config:
+                severity: warn
+                store_failures: true
+                store_failures_as: table
+                schema: audit
+
+      - name: business_unit
+        data_tests:
+          - not_null:
+              name: mart_benefits_impact_business_unit_not_null
+              config:
+                severity: warn
+                store_failures: true
+                store_failures_as: table
+                schema: audit
+
+    data_tests:
+      - is_true:
+          name: mart_benefits_impact_counts_and_amounts_are_non_negative
+          arguments:
+            expression: >
+              employee_count > 0
+              and active_commute_declared_employee_count >= 0
+              and employee_with_valid_route_count >= 0
+              and commute_bonus_eligible_employee_count >= 0
+              and annual_commute_bonus_gross >= 0
+              and wellbeing_eligible_employee_count >= 0
+              and awarded_wellbeing_days >= 0
+              and employee_with_at_least_one_benefit_count >= 0
+              and employee_with_both_benefits_count >= 0
+          config:
+            severity: warn
+            store_failures: true
+            store_failures_as: table
+            schema: audit
