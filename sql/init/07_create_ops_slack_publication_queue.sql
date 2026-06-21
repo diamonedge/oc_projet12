@@ -26,19 +26,24 @@ CREATE TABLE IF NOT EXISTS ops.slack_publication_queue (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT ck_slack_publication_status
-        CHECK (
-            publication_status IN (
-                'PENDING',
-                'IN_PROGRESS',
-                'PUBLISHED',
-                'ERROR'
-            )
-        ),
-
     CONSTRAINT ck_slack_publication_attempt_count
         CHECK (attempt_count >= 0)
 );
+
+ALTER TABLE ops.slack_publication_queue
+    DROP CONSTRAINT IF EXISTS ck_slack_publication_status;
+
+ALTER TABLE ops.slack_publication_queue
+    ADD CONSTRAINT ck_slack_publication_status
+    CHECK (
+        publication_status IN (
+            'PENDING',
+            'IN_PROGRESS',
+            'PUBLISHED',
+            'ERROR',
+            'BACKFILLED'
+        )
+    );
 
 CREATE INDEX IF NOT EXISTS idx_slack_publication_queue_status
     ON ops.slack_publication_queue (
@@ -49,6 +54,8 @@ CREATE INDEX IF NOT EXISTS idx_slack_publication_queue_status
 
 GRANT USAGE ON SCHEMA ops TO :"app_user";
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ops.slack_publication_queue TO :"app_user";
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON ops.slack_publication_queue
+TO :"app_user";
 
 COMMIT;

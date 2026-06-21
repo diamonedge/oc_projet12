@@ -1,4 +1,43 @@
-with active_parameters as (
+with calculation_context as (
+
+    select
+        max(activity_date) as calculation_as_of_date
+
+    from {{ ref('fct_sport_activities') }}
+
+),
+
+ranked_parameter_versions as (
+
+    select
+        parameters.parameter_name,
+        parameters.parameter_value,
+
+        row_number() over (
+            partition by parameters.parameter_name
+            order by
+                parameters.valid_from desc,
+                parameters.source_row_number desc
+        ) as parameter_rank
+
+    from {{ ref('config_benefit_parameters') }} as parameters
+
+    cross join calculation_context
+
+    where parameters.record_is_valid
+      and parameters.parameter_name in (
+          'wellbeing_activity_threshold',
+          'wellbeing_days'
+      )
+      and parameters.valid_from <= calculation_context.calculation_as_of_date
+      and (
+          parameters.valid_to is null
+          or parameters.valid_to >= calculation_context.calculation_as_of_date
+      )
+
+),
+
+active_parameters as (
 
     select
         max(parameter_value) filter (
@@ -9,18 +48,9 @@ with active_parameters as (
             where parameter_name = 'wellbeing_days'
         ) as wellbeing_days
 
-    from {{ ref('config_benefit_parameters') }}
+    from ranked_parameter_versions
 
-    where record_is_valid
-
-),
-
-calculation_context as (
-
-    select
-        max(activity_date) as calculation_as_of_date
-
-    from {{ ref('fct_sport_activities') }}
+    where parameter_rank = 1
 
 ),
 
@@ -52,7 +82,11 @@ employees as (
         hr.last_name,
         hr.first_name,
         hr.business_unit,
-        coalesce(sport.has_declared_sport, false) as has_declared_sport
+
+        coalesce(
+            sport.has_declared_sport,
+            false
+        ) as has_declared_sport
 
     from {{ ref('stg_hr_employees') }} as hr
 
@@ -76,6 +110,7 @@ select
     ) as activity_count_last_12_months,
 
     calculation_context.calculation_as_of_date,
+
     active_parameters.wellbeing_activity_threshold,
     active_parameters.wellbeing_days,
 
