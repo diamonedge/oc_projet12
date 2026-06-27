@@ -1,0 +1,42 @@
+id: sport_benefits_change_rate
+
+namespace: sport.data.solution
+
+description: |
+  Met à jour le taux de prime depuis l’interface Kestra
+  en appelant le script métier existant.
+
+inputs:
+  - id: bonus_rate
+    type: FLOAT
+    required: true
+    min: 0.01
+    max: 1.00
+    displayName: Nouveau taux de prime
+    description: |
+      Saisir une valeur décimale.
+      Exemple : 0.06 correspond à 6 %.
+
+tasks:
+  - id: change_bonus_rate
+    type: io.kestra.plugin.scripts.shell.Commands
+    description: Exécute le script local de changement du taux.
+
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      volumes:
+        - /home/vincent_moutia/workspace/oc_projet12:/workspace/oc_projet12
+        - /var/run/docker.sock:/var/run/docker.sock
+
+    containerImage: docker:27-cli
+
+    commands:
+      - |
+        set -eu
+
+        apk add --no-cache bash docker-cli-compose >/dev/null
+
+        cd /workspace/oc_projet12
+
+        bash scripts/15_change_bonus_rate_to_nth_percent.sh "{{ inputs.bonus_rate }}"

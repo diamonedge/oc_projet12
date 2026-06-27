@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+sudo chown -R vincent_moutia:vincent_moutia /home/vincent_moutia/workspace/oc_projet12/
 set -Eeuo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
